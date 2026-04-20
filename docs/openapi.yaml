@@ -1,0 +1,569 @@
+openapi: 3.1.0
+info:
+  title: QPay v2 API
+  version: 2.0.0
+  description: |
+    QPay is Mongolia's payment gateway. This spec documents the endpoints
+    covered by the `github.com/codify-mn/qpay-go` SDK.
+  license:
+    name: MIT
+servers:
+  - url: https://merchant-sandbox.qpay.mn
+    description: Sandbox
+  - url: https://merchant.qpay.mn
+    description: Production
+
+tags:
+  - name: Auth
+  - name: Merchant
+  - name: Invoice
+  - name: Payment
+  - name: Ebarimt
+  - name: Locations
+
+security:
+  - bearerAuth: []
+
+paths:
+  /v2/auth/token:
+    post:
+      tags: [Auth]
+      summary: Obtain access + refresh tokens
+      description: Send HTTP Basic (`username:password`) credentials.
+      security:
+        - basicAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                terminal_id: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenResponse' }
+
+  /v2/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh an access token
+      description: Call with `Authorization: Bearer <refresh_token>`.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenResponse' }
+
+  /v2/merchant/company:
+    post:
+      tags: [Merchant]
+      summary: Register a company merchant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateCompanyMerchantRequest' }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Merchant' }
+
+  /v2/merchant/person:
+    post:
+      tags: [Merchant]
+      summary: Register a person merchant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreatePersonMerchantRequest' }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Merchant' }
+
+  /v2/merchant/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Merchant]
+      summary: Fetch merchant by ID
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Merchant' }
+    put:
+      tags: [Merchant]
+      summary: Update merchant
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateMerchantRequest' }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Merchant' }
+    delete:
+      tags: [Merchant]
+      summary: Delete merchant
+      responses:
+        "200": { description: OK }
+
+  /v2/merchant/list:
+    get:
+      tags: [Merchant]
+      summary: Paginated merchant list
+      parameters:
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 25 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantList' }
+
+  /v2/invoice:
+    post:
+      tags: [Invoice]
+      summary: Create an invoice (returns QR + bank deep links)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateInvoiceRequest' }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+
+  /v2/invoice/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Invoice]
+      summary: Fetch invoice detail
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InvoiceDetail' }
+    delete:
+      tags: [Invoice]
+      summary: Cancel invoice
+      responses:
+        "200": { description: OK }
+
+  /v2/payment/check:
+    post:
+      tags: [Payment]
+      summary: Check payment status for an invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                object_type: { type: string, enum: [INVOICE] }
+                object_id: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentCheck' }
+
+  /v2/payment/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Payment]
+      summary: Fetch payment by ID
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Payment' }
+
+  /v2/payment/cancel/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [Payment]
+      summary: Cancel a payment
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefundRequest' }
+      responses:
+        "200": { description: OK }
+
+  /v2/payment/refund/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [Payment]
+      summary: Refund a payment
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefundRequest' }
+      responses:
+        "200": { description: OK }
+
+  /v2/payment/list:
+    post:
+      tags: [Payment]
+      summary: Search payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentListRequest' }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentList' }
+
+  /v2/ebarimt/create:
+    post:
+      tags: [Ebarimt]
+      summary: Create an eBarimt receipt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateEbarimtRequest' }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ebarimt' }
+
+  /v2/aimaghot:
+    get:
+      tags: [Locations]
+      summary: List cities (aimags)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Location' }
+
+  /v2/sumduureg/{code}:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Locations]
+      summary: List districts (sums) for a city
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Location' }
+
+  /v2/bank/list:
+    get:
+      tags: [Locations]
+      summary: List supported banks
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Bank' }
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    TokenResponse:
+      type: object
+      properties:
+        token_type: { type: string }
+        access_token: { type: string }
+        refresh_token: { type: string }
+        expires_in: { type: integer }
+
+    BankAccount:
+      type: object
+      required: [account_bank_code, account_number, account_name]
+      properties:
+        account_bank_code: { type: string, example: "040000" }
+        account_number: { type: string }
+        account_name: { type: string }
+        is_default: { type: boolean }
+
+    CreateCompanyMerchantRequest:
+      type: object
+      required: [owner_register_no, register_number, name, bank_account]
+      properties:
+        owner_register_no: { type: string }
+        owner_first_name: { type: string }
+        owner_last_name: { type: string }
+        register_number: { type: string }
+        name: { type: string }
+        mcc_code: { type: string }
+        city: { type: string }
+        district: { type: string }
+        address: { type: string }
+        phone: { type: string }
+        email: { type: string, format: email }
+        bank_account: { $ref: '#/components/schemas/BankAccount' }
+
+    CreatePersonMerchantRequest:
+      type: object
+      required: [register_number, first_name, last_name, bank_account]
+      properties:
+        register_number: { type: string }
+        first_name: { type: string }
+        last_name: { type: string }
+        mcc_code: { type: string }
+        city: { type: string }
+        district: { type: string }
+        address: { type: string }
+        business_name: { type: string }
+        phone: { type: string }
+        email: { type: string, format: email }
+        bank_account: { $ref: '#/components/schemas/BankAccount' }
+
+    UpdateMerchantRequest:
+      type: object
+      properties:
+        name: { type: string }
+        mcc_code: { type: string }
+        city: { type: string }
+        district: { type: string }
+        address: { type: string }
+        phone: { type: string }
+        email: { type: string, format: email }
+        bank_account: { $ref: '#/components/schemas/BankAccount' }
+
+    Merchant:
+      type: object
+      properties:
+        id: { type: string }
+        vendor_id: { type: string }
+        type: { type: string, enum: [COMPANY, PERSON] }
+        register_number: { type: string }
+        name: { type: string }
+        p2p_terminal_id: { type: string }
+        card_terminal_id: { type: string }
+        mcc_code: { type: string }
+        city: { type: string }
+        district: { type: string }
+        address: { type: string }
+        phone: { type: string }
+        email: { type: string }
+
+    MerchantList:
+      type: object
+      properties:
+        count: { type: integer }
+        offset: { type: integer }
+        limit: { type: integer }
+        rows:
+          type: array
+          items: { $ref: '#/components/schemas/Merchant' }
+
+    InvoiceLine:
+      type: object
+      properties:
+        line_description: { type: string }
+        line_quantity: { type: integer }
+        line_unit_price: { type: number }
+
+    CreateInvoiceRequest:
+      type: object
+      required: [amount, description]
+      properties:
+        merchant_id: { type: string }
+        branch_code: { type: string }
+        terminal_id: { type: string }
+        invoice_code: { type: string }
+        sender_code: { type: string }
+        invoice_receiver_code: { type: string }
+        description: { type: string }
+        amount: { type: number }
+        currency: { type: string, default: MNT }
+        customer_name: { type: string }
+        customer_logo: { type: string }
+        callback_url: { type: string, format: uri }
+        mcc_code: { type: string }
+        bank_accounts:
+          type: array
+          items: { $ref: '#/components/schemas/BankAccount' }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/InvoiceLine' }
+        expiry_date: { type: string, format: date-time }
+
+    Invoice:
+      type: object
+      properties:
+        id: { type: string }
+        qr_code: { type: string }
+        qr_image: { type: string }
+        qPay_shortUrl: { type: string }
+        urls:
+          type: array
+          items: { $ref: '#/components/schemas/InvoiceURL' }
+
+    InvoiceURL:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        logo: { type: string }
+        link: { type: string }
+
+    InvoiceDetail:
+      type: object
+      properties:
+        invoice_id: { type: string }
+        invoice_code: { type: string }
+        amount: { type: number }
+        invoice_status: { type: string, enum: [OPEN, PAID, CANCELLED] }
+        invoice_description: { type: string }
+        created_date: { type: string }
+        paid_date: { type: string }
+
+    PaymentCheck:
+      type: object
+      properties:
+        count: { type: integer }
+        paid_amount: { type: number }
+        checked_date: { type: string }
+        rows:
+          type: array
+          items: { $ref: '#/components/schemas/Payment' }
+
+    Payment:
+      type: object
+      properties:
+        payment_id: { type: string }
+        payment_status: { type: string }
+        payment_date: { type: string }
+        payment_amount: { type: number }
+        payment_fee: { type: number }
+        payment_bank: { type: string }
+        payment_method: { type: string }
+        terminal_id: { type: string }
+
+    PaymentListRequest:
+      type: object
+      properties:
+        merchant_id: { type: string }
+        merchant_branch_code: { type: string }
+        payment_status: { type: string }
+        start_date: { type: string }
+        end_date: { type: string }
+        offset: { type: integer }
+        limit: { type: integer }
+
+    PaymentList:
+      type: object
+      properties:
+        count: { type: integer }
+        paid_amount: { type: number }
+        rows:
+          type: array
+          items: { $ref: '#/components/schemas/Payment' }
+
+    RefundRequest:
+      type: object
+      properties:
+        callback_url: { type: string, format: uri }
+        note: { type: string }
+
+    CreateEbarimtRequest:
+      type: object
+      required: [payment_id, ebarimt_receiver_type]
+      properties:
+        payment_id: { type: string }
+        ebarimt_receiver_type: { type: string, enum: [CITIZEN, ORGANIZATION] }
+
+    Ebarimt:
+      type: object
+      properties:
+        id: { type: string }
+        payment_id: { type: string }
+        ebarimt_type: { type: string }
+        ebarimt_receipt: { type: string }
+        ebarimt_qr: { type: string }
+
+    Location:
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
+
+    Bank:
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
+        logo: { type: string }
+
+    APIError:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
