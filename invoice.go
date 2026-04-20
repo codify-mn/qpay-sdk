@@ -7,8 +7,8 @@ import (
 
 // CreateInvoice creates a new invoice and returns QR + bank deep links.
 func (c *Client) CreateInvoice(ctx context.Context, req CreateInvoiceRequest) (*Invoice, error) {
-	if req.SenderTerminalCode == "" && c.terminalID != "" {
-		req.SenderTerminalCode = c.terminalID
+	if req.Currency == "" {
+		req.Currency = "MNT"
 	}
 	body, err := c.doRequest(ctx, http.MethodPost, "/v2/invoice", req)
 	if err != nil {

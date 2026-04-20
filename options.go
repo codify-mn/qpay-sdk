@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	sandboxBaseURL    = "https://merchant-sandbox.qpay.mn"
-	productionBaseURL = "https://merchant.qpay.mn"
+	sandboxBaseURL    = "https://quickqr.qpay.mn"
+	productionBaseURL = "https://quickqr.qpay.mn"
 	defaultTimeout    = 30 * time.Second
 )
 

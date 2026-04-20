@@ -45,8 +45,8 @@ func TestCreateInvoice(t *testing.T) {
 	defer srv.Close()
 
 	inv, err := c.CreateInvoice(context.Background(), CreateInvoiceRequest{
-		InvoiceCode: "TEST", SenderInvoiceNo: "S1", InvoiceReceiverCode: "terminal",
-		InvoiceDescription: "Test", Amount: 12345,
+		MerchantID: "M1", Amount: 12345, Currency: "MNT",
+		CustomerName: "Cust", CallbackURL: "https://cb", Description: "Test",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -97,7 +97,7 @@ func TestCancelInvoice(t *testing.T) {
 	}
 }
 
-func TestCreateInvoice_appliesClientTerminalID(t *testing.T) {
+func TestCreateInvoice_defaultsCurrencyToMNT(t *testing.T) {
 	var captured CreateInvoiceRequest
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -110,11 +110,11 @@ func TestCreateInvoice_appliesClientTerminalID(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c, _ := New(WithBaseURL(srv.URL), WithCredentials("u", "p"), WithTerminalID("TERM123"))
-	if _, err := c.CreateInvoice(context.Background(), CreateInvoiceRequest{Amount: 1}); err != nil {
+	c, _ := New(WithBaseURL(srv.URL), WithCredentials("u", "p"))
+	if _, err := c.CreateInvoice(context.Background(), CreateInvoiceRequest{MerchantID: "M", Amount: 1}); err != nil {
 		t.Fatal(err)
 	}
-	if captured.SenderTerminalCode != "TERM123" {
-		t.Fatalf("terminal_id not applied: got %q", captured.SenderTerminalCode)
+	if captured.Currency != "MNT" {
+		t.Fatalf("currency default not applied: got %q", captured.Currency)
 	}
 }

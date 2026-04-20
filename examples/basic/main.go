@@ -1,6 +1,6 @@
 // Example: authenticate, create an invoice, poll for payment.
 //
-//	QPAY_USERNAME=... QPAY_PASSWORD=... QPAY_INVOICE_CODE=... \
+//	QPAY_USERNAME=... QPAY_PASSWORD=... QPAY_MERCHANT_ID=... \
 //	  go run ./examples/basic
 package main
 
@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	qpay "github.com/codify-mn/qpay-sdk"
 )
@@ -28,15 +27,15 @@ func main() {
 	if err := client.Ping(ctx); err != nil {
 		log.Fatalf("ping: %v", err)
 	}
-	fmt.Println("authenticated with QPay sandbox")
+	fmt.Println("authenticated with QPay")
 
 	inv, err := client.CreateInvoice(ctx, qpay.CreateInvoiceRequest{
-		InvoiceCode:         os.Getenv("QPAY_INVOICE_CODE"),
-		SenderInvoiceNo:     fmt.Sprintf("EX-%d", time.Now().Unix()),
-		InvoiceReceiverCode: "terminal",
-		InvoiceDescription:  "qpay-sdk example invoice",
-		Amount:              100,
-		CallbackURL:         "https://example.com/webhooks/qpay",
+		MerchantID:   os.Getenv("QPAY_MERCHANT_ID"),
+		Amount:       100,
+		Currency:     "MNT",
+		CustomerName: "Example Co",
+		CallbackURL:  "https://example.com/webhooks/qpay",
+		Description:  "qpay-sdk example invoice",
 	})
 	if err != nil {
 		log.Fatalf("create invoice: %v", err)
