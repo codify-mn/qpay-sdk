@@ -45,7 +45,8 @@ func TestCreateInvoice(t *testing.T) {
 	defer srv.Close()
 
 	inv, err := c.CreateInvoice(context.Background(), CreateInvoiceRequest{
-		MerchantID: "M1", Amount: 12345, Description: "Test", Currency: "MNT",
+		InvoiceCode: "TEST", SenderInvoiceNo: "S1", InvoiceReceiverCode: "terminal",
+		InvoiceDescription: "Test", Amount: 12345,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -113,7 +114,7 @@ func TestCreateInvoice_appliesClientTerminalID(t *testing.T) {
 	if _, err := c.CreateInvoice(context.Background(), CreateInvoiceRequest{Amount: 1}); err != nil {
 		t.Fatal(err)
 	}
-	if captured.TerminalID != "TERM123" {
-		t.Fatalf("terminal_id not applied: got %q", captured.TerminalID)
+	if captured.SenderTerminalCode != "TERM123" {
+		t.Fatalf("terminal_id not applied: got %q", captured.SenderTerminalCode)
 	}
 }

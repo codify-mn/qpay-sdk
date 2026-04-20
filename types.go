@@ -110,23 +110,37 @@ type InvoiceLine struct {
 }
 
 // CreateInvoiceRequest creates a payment invoice.
+//
+// QPay v2 required fields: InvoiceCode (pre-registered template), SenderInvoiceNo,
+// InvoiceReceiverCode, InvoiceDescription, Amount, CallbackURL.
 type CreateInvoiceRequest struct {
-	MerchantID      string        `json:"merchant_id,omitempty"`
-	BranchCode      string        `json:"branch_code,omitempty"`
-	TerminalID      string        `json:"terminal_id,omitempty"`
-	InvoiceCode     string        `json:"invoice_code,omitempty"`
-	SenderCode      string        `json:"sender_code,omitempty"`
-	InvoiceReceiver string        `json:"invoice_receiver_code,omitempty"`
-	Description     string        `json:"description"`
-	Amount          float64       `json:"amount"`
-	Currency        string        `json:"currency,omitempty"`
-	CustomerName    string        `json:"customer_name,omitempty"`
-	CustomerLogo    string        `json:"customer_logo,omitempty"`
-	CallbackURL     string        `json:"callback_url,omitempty"`
-	MCCCode         string        `json:"mcc_code,omitempty"`
-	BankAccounts    []BankAccount `json:"bank_accounts,omitempty"`
-	Lines           []InvoiceLine `json:"lines,omitempty"`
-	ExpiryDate      *time.Time    `json:"expiry_date,omitempty"`
+	InvoiceCode         string               `json:"invoice_code"`
+	SenderInvoiceNo     string               `json:"sender_invoice_no"`
+	SenderBranchCode    string               `json:"sender_branch_code,omitempty"`
+	SenderStaffCode     string               `json:"sender_staff_code,omitempty"`
+	SenderTerminalCode  string               `json:"sender_terminal_code,omitempty"`
+	InvoiceReceiverCode string               `json:"invoice_receiver_code"`
+	InvoiceReceiverData *InvoiceReceiverData `json:"invoice_receiver_data,omitempty"`
+	InvoiceDescription  string               `json:"invoice_description"`
+	Amount              float64              `json:"amount"`
+	CallbackURL         string               `json:"callback_url"`
+	EnableExpiry        bool                 `json:"enable_expiry,omitempty"`
+	ExpiryDate          *time.Time           `json:"expiry_date,omitempty"`
+	CalculateVat        bool                 `json:"calculate_vat,omitempty"`
+	AllowPartial        bool                 `json:"allow_partial,omitempty"`
+	MinimumAmount       float64              `json:"minimum_amount,omitempty"`
+	AllowExceed         bool                 `json:"allow_exceed,omitempty"`
+	MaximumAmount       float64              `json:"maximum_amount,omitempty"`
+	Note                string               `json:"note,omitempty"`
+	Lines               []InvoiceLine        `json:"lines,omitempty"`
+}
+
+// InvoiceReceiverData identifies the payer (invoice recipient).
+type InvoiceReceiverData struct {
+	Register string `json:"register,omitempty"`
+	Name     string `json:"name,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Phone    string `json:"phone,omitempty"`
 }
 
 // Invoice is a created invoice containing QR + deep links.
