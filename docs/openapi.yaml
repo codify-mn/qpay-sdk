@@ -50,7 +50,7 @@ paths:
     post:
       tags: [Auth]
       summary: Refresh an access token
-      description: Call with `Authorization: Bearer <refresh_token>`.
+      description: "Call with `Authorization: Bearer <refresh_token>`."
       responses:
         "200":
           description: OK
