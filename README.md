@@ -61,10 +61,12 @@ func main() {
 
 ## Documentation
 
-Browse the full API spec locally:
+Hosted: **<https://codify-mn.github.io/qpay-sdk/>**
+
+Or browse locally:
 
 ```bash
-make docs   # opens http://localhost:8080/docs/scalar.html
+make docs   # opens http://localhost:8080/
 ```
 
 Powered by [Scalar](https://scalar.com) over the `docs/openapi.yaml` spec bundled in the module.

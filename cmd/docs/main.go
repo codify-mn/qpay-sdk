@@ -1,4 +1,4 @@
-// Command docs serves the qpay-go OpenAPI spec rendered with Scalar.
+// Command docs serves the qpay-sdk OpenAPI spec rendered with Scalar.
 //
 //	go run ./cmd/docs              # listens on :8080
 //	go run ./cmd/docs -addr :9000  # custom port
@@ -28,6 +28,6 @@ func main() {
 	mux.Handle("/", http.FileServer(http.FS(sub)))
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte("ok")) })
 
-	log.Printf("qpay-go docs → http://localhost%s/scalar.html", *addr)
+	log.Printf("qpay-sdk docs → http://localhost%s/", *addr)
 	log.Fatal(http.ListenAndServe(*addr, mux))
 }
