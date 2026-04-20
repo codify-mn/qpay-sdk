@@ -5,7 +5,7 @@ Go SDK for [QPay](https://qpay.mn) v2 — Mongolian payment gateway.
 ## Install
 
 ```bash
-go get github.com/codify-mn/qpay-go
+go get github.com/codify-mn/qpay-sdk
 ```
 
 ## Quickstart
@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"log"
 
-	qpay "github.com/codify-mn/qpay-go"
+	qpay "github.com/codify-mn/qpay-sdk"
 )
 
 func main() {

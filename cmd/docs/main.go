@@ -12,7 +12,7 @@ import (
 	"log"
 	"net/http"
 
-	qpay "github.com/codify-mn/qpay-go"
+	qpay "github.com/codify-mn/qpay-sdk"
 )
 
 func main() {

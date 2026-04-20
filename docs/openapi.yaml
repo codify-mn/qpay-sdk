@@ -4,7 +4,7 @@ info:
   version: 2.0.0
   description: |
     QPay is Mongolia's payment gateway. This spec documents the endpoints
-    covered by the `github.com/codify-mn/qpay-go` SDK.
+    covered by the `github.com/codify-mn/qpay-sdk` SDK.
   license:
     name: MIT
 servers:

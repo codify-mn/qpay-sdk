@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	qpay "github.com/codify-mn/qpay-go"
+	qpay "github.com/codify-mn/qpay-sdk"
 )
 
 func main() {
