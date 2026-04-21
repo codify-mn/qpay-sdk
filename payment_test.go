@@ -15,7 +15,7 @@ func TestCheckPayment_IsPaid(t *testing.T) {
 		case "/v2/payment/check":
 			var req checkPaymentRequest
 			_ = json.NewDecoder(r.Body).Decode(&req)
-			if req.ObjectType != "INVOICE" || req.ObjectID != "INV" {
+			if req.InvoiceID != "INV" {
 				t.Fatalf("bad body: %+v", req)
 			}
 			_, _ = w.Write([]byte(`{"count":1,"paid_amount":500,"rows":[{"payment_id":"P1","payment_status":"PAID","payment_amount":500}]}`))

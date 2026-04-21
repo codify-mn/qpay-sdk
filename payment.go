@@ -8,8 +8,7 @@ import (
 // CheckPayment returns all payments recorded against an invoice.
 func (c *Client) CheckPayment(ctx context.Context, invoiceID string) (*PaymentCheck, error) {
 	body, err := c.doRequest(ctx, http.MethodPost, "/v2/payment/check", checkPaymentRequest{
-		ObjectType: "INVOICE",
-		ObjectID:   invoiceID,
+		InvoiceID: invoiceID,
 	})
 	if err != nil {
 		return nil, err

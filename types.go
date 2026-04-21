@@ -1,5 +1,11 @@
 package qpay
 
+import (
+	"encoding/json"
+	"fmt"
+	"strconv"
+)
+
 // Config is a convenience struct matching what many consumers load from YAML.
 // Equivalent to passing WithBaseURL / WithCredentials / WithTerminalID separately.
 type Config struct {
@@ -151,12 +157,41 @@ type InvoiceDetail struct {
 	PaidDate    string  `json:"paid_date,omitempty"`
 }
 
-// checkPaymentRequest is the internal body for POST /v2/payment/check.
+// UnmarshalJSON tolerates Quick Pay returning numeric fields as strings
+// (e.g. `"amount": "100.00"`).
+func (d *InvoiceDetail) UnmarshalJSON(data []byte) error {
+	type alias InvoiceDetail
+	aux := struct {
+		Amount json.RawMessage `json:"amount"`
+		*alias
+	}{alias: (*alias)(d)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if len(aux.Amount) == 0 || string(aux.Amount) == "null" {
+		return nil
+	}
+	if aux.Amount[0] == '"' {
+		var s string
+		if err := json.Unmarshal(aux.Amount, &s); err != nil {
+			return err
+		}
+		if s == "" {
+			return nil
+		}
+		f, err := strconv.ParseFloat(s, 64)
+		if err != nil {
+			return fmt.Errorf("qpay: invoice amount %q is not numeric: %w", s, err)
+		}
+		d.Amount = f
+		return nil
+	}
+	return json.Unmarshal(aux.Amount, &d.Amount)
+}
+
+// checkPaymentRequest is the internal body for POST /v2/payment/check (Quick Pay).
 type checkPaymentRequest struct {
-	ObjectType string `json:"object_type"`
-	ObjectID   string `json:"object_id"`
-	Offset     int    `json:"offset,omitempty"`
-	Limit      int    `json:"limit,omitempty"`
+	InvoiceID string `json:"invoice_id"`
 }
 
 // PaymentCheck is the response from CheckPayment.
