@@ -1,4 +1,4 @@
-# qpay-go
+# qpay-sdk
 
 Go SDK for [QPay](https://qpay.mn) v2 — Mongolian payment gateway.
 

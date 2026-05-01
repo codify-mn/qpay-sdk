@@ -2,9 +2,9 @@ package qpay
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 )
+
 
 // CreateCompanyMerchant registers a company as a QPay merchant.
 func (c *Client) CreateCompanyMerchant(ctx context.Context, req CreateCompanyMerchantRequest) (*Merchant, error) {
@@ -50,8 +50,7 @@ func (c *Client) ListMerchants(ctx context.Context, opts ListOptions) (*Merchant
 	if opts.Limit <= 0 {
 		opts.Limit = 25
 	}
-	path := fmt.Sprintf("/v2/merchant/list?offset=%d&limit=%d", opts.Offset, opts.Limit)
-	body, err := c.doRequest(ctx, http.MethodGet, path, nil)
+	body, err := c.doRequest(ctx, http.MethodPost, "/v2/merchant/list", opts)
 	if err != nil {
 		return nil, err
 	}

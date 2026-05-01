@@ -102,8 +102,8 @@ type MerchantList struct {
 
 // ListOptions is pagination for list endpoints.
 type ListOptions struct {
-	Offset int
-	Limit  int
+	Offset int `json:"offset"`
+	Limit  int `json:"limit"`
 }
 
 // InvoiceLine is a line item on an invoice.

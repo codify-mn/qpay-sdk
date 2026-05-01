@@ -8,9 +8,9 @@ info:
   license:
     name: MIT
 servers:
-  - url: https://merchant-sandbox.qpay.mn
+  - url: https://sandbox-quickqr.qpay.mn
     description: Sandbox
-  - url: https://merchant.qpay.mn
+  - url: https://quickqr.qpay.mn
     description: Production
 
 tags:
