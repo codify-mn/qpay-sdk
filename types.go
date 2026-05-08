@@ -93,17 +93,18 @@ type Merchant struct {
 
 // MerchantList is the paginated response from ListMerchants.
 type MerchantList struct {
-	Count   int        `json:"count"`
-	Rows    []Merchant `json:"rows"`
-	Offset  int        `json:"offset"`
-	Limit   int        `json:"limit"`
-	Message string     `json:"message,omitempty"`
+	Count      int        `json:"count"`
+	Rows       []Merchant `json:"rows"`
+	PageNumber int        `json:"page_number"`
+	PageLimit  int        `json:"page_limit"`
+	Message    string     `json:"message,omitempty"`
 }
 
 // ListOptions is pagination for list endpoints.
+// QPay v2 expects 1-based page_number + page_limit.
 type ListOptions struct {
-	Offset int `json:"offset"`
-	Limit  int `json:"limit"`
+	PageNumber int `json:"page_number"`
+	PageLimit  int `json:"page_limit"`
 }
 
 // InvoiceLine is a line item on an invoice.

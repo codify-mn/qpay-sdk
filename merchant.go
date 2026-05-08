@@ -46,9 +46,13 @@ func (c *Client) GetMerchant(ctx context.Context, merchantID string) (*Merchant,
 }
 
 // ListMerchants returns a paginated slice of merchants.
+// page_number is 1-based per QPay v2.
 func (c *Client) ListMerchants(ctx context.Context, opts ListOptions) (*MerchantList, error) {
-	if opts.Limit <= 0 {
-		opts.Limit = 25
+	if opts.PageLimit <= 0 {
+		opts.PageLimit = 25
+	}
+	if opts.PageNumber <= 0 {
+		opts.PageNumber = 1
 	}
 	body, err := c.doRequest(ctx, http.MethodPost, "/v2/merchant/list", opts)
 	if err != nil {

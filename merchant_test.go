@@ -2,6 +2,7 @@ package qpay
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
 	"testing"
@@ -27,21 +28,25 @@ func TestCreateCompanyMerchant(t *testing.T) {
 	}
 }
 
-func TestListMerchants_paginationQuery(t *testing.T) {
+func TestListMerchants_paginationBody(t *testing.T) {
 	c, srv := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/v2/auth/token":
 			tokenHandler(w)
 		case strings.HasPrefix(r.URL.Path, "/v2/merchant/list"):
-			if r.URL.Query().Get("limit") != "50" || r.URL.Query().Get("offset") != "10" {
-				t.Fatalf("pagination not forwarded: %s", r.URL.RawQuery)
+			var body ListOptions
+			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+				t.Fatalf("decode body: %v", err)
+			}
+			if body.PageNumber != 2 || body.PageLimit != 50 {
+				t.Fatalf("pagination not forwarded: %+v", body)
 			}
 			_, _ = w.Write([]byte(`{"count":0,"rows":[]}`))
 		}
 	})
 	defer srv.Close()
 
-	if _, err := c.ListMerchants(context.Background(), ListOptions{Offset: 10, Limit: 50}); err != nil {
+	if _, err := c.ListMerchants(context.Background(), ListOptions{PageNumber: 2, PageLimit: 50}); err != nil {
 		t.Fatal(err)
 	}
 }
